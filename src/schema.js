@@ -14,6 +14,7 @@ let {
   GraphQLSchema,
 } = require('graphql');
 const axios = require('axios');
+const _ = require('lodash');
 
 const LigthSwitchType = new GraphQLObjectType({
     name: "LightSwitch",
@@ -24,24 +25,24 @@ const LigthSwitchType = new GraphQLObjectType({
     })
 });
 
-const TemperatureType = new GraphQLObjectType({
-  name: "TemperatureType",
-  description: "This represents an Temperature",
+const TemperatureGasType = new GraphQLObjectType({
+  name: "TemperatureGasType",
+  description: "This represents an TemperatureGas",
   fields: () => ({
     d: {type: new GraphQLNonNull(GraphQLString)},
+    tm: {type: new GraphQLNonNull(GraphQLFloat)},
     ta: {type: new GraphQLNonNull(GraphQLFloat)},
     te: {type: new GraphQLNonNull(GraphQLFloat)},
-    tm: {type: new GraphQLNonNull(GraphQLFloat)}
-  })
-});
+    gas: {
+      type: GraphQLString,
+      resolve: function(temp) {
+        const gasMonthly = axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=graph&sensor=counter&idx=7&range=month').then(function (response) {
+              return _.find(response.data.result, { 'd': temp.d}).v
+            })
 
-const GasType = new GraphQLObjectType({
-  name: "GasType",
-  description: "This represents an Gas",
-  fields: () => ({
-    c: {type: new GraphQLNonNull(GraphQLString)},
-    d: {type: new GraphQLNonNull(GraphQLString)},
-    v: {type: new GraphQLNonNull(GraphQLString)}
+        return gasMonthly;
+      }
+    }
   })
 });
 
@@ -62,26 +63,15 @@ const RootType = new GraphQLObjectType({
             return lightSwitches;
         }
       },
-      temperatureMonthly: {
-        type: new GraphQLList(TemperatureType),
-        description: "List of monthly TemperatureType",
+      temperatureGasMonthly: {
+        type: new GraphQLList(TemperatureGasType),
+        description: "List of monthly TemperatureGasType",
         resolve: function() {
-            const temperatureMonthly = axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=graph&sensor=temp&idx=29&range=month').then(function (response) {
+            const temperatureGasMonthly = axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=graph&sensor=temp&idx=29&range=month').then(function (response) {
                 return response.data.result
             })
   
-            return temperatureMonthly;
-        }
-      },
-      gasMonthly: {
-        type: new GraphQLList(GasType),
-        description: "List of monthly GasType",
-        resolve: function() {
-            const gasMonthly = axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=graph&sensor=counter&idx=7&range=month').then(function (response) {
-                return response.data.result
-            })
-
-            return gasMonthly;
+            return temperatureGasMonthly;
         }
       }
     })
