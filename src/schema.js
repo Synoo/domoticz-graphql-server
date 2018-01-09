@@ -5,6 +5,7 @@
 let {
   // These are the basic GraphQL types need in this tutorial
   GraphQLString,
+  GraphQLFloat,
   GraphQLList,
   GraphQLObjectType,
   // This is used to create required fileds and arguments
@@ -23,10 +24,21 @@ const LigthSwitchType = new GraphQLObjectType({
     })
 });
 
+const TemperatureType = new GraphQLObjectType({
+  name: "TemperatureType",
+  description: "This represents an Temperature",
+  fields: () => ({
+    d: {type: new GraphQLNonNull(GraphQLString)},
+    ta: {type: new GraphQLNonNull(GraphQLFloat)},
+    te: {type: new GraphQLNonNull(GraphQLFloat)},
+    tm: {type: new GraphQLNonNull(GraphQLFloat)}
+  })
+});
+
 // This is the Root Query
-const LightSwitchRootType = new GraphQLObjectType({
-    name: 'LightSwitchSchema',
-    description: "Lightswitch",
+const RootType = new GraphQLObjectType({
+    name: 'RootTypeSchema',
+    description: "RootTypeSchema",
     fields: () => ({
       allLightSwitches: {
         type: new GraphQLList(LigthSwitchType),
@@ -38,12 +50,24 @@ const LightSwitchRootType = new GraphQLObjectType({
 
             return lightSwitches;
         }
+      },
+      temperatureMonthly: {
+        type: new GraphQLList(TemperatureType),
+        description: "List of monthly TemperatureType",
+        resolve: function() {
+            const temperatureMonthly = axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=graph&sensor=temp&idx=29&range=month').then(function (response) {
+                return response.data.result
+            })
+  
+            return temperatureMonthly;
+        }
       }
     })
   });
 
-const LightSwitchSchema = new GraphQLSchema({
-    query: LightSwitchRootType
+const Schema = new GraphQLSchema({
+    query: RootType
 });
 
-module.exports = LightSwitchSchema;
+module.exports = Schema;
+
