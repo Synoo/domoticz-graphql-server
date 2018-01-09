@@ -1,18 +1,4 @@
-/* Here a simple schema is constructed without using the GraphQL query language. 
-  e.g. using 'new GraphQLObjectType' to create an object type 
-*/
-
-let {
-  // These are the basic GraphQL types need in this tutorial
-  GraphQLString,
-  GraphQLFloat,
-  GraphQLList,
-  GraphQLObjectType,
-  // This is used to create required fileds and arguments
-  GraphQLNonNull,
-  // This is the class we need to create the schema
-  GraphQLSchema,
-} = require('graphql');
+const { GraphQLString, GraphQLFloat, GraphQLList, GraphQLObjectType, GraphQLNonNull, GraphQLSchema } = require('graphql');
 const axios = require('axios');
 const _ = require('lodash');
 
@@ -46,8 +32,6 @@ const TemperatureGasType = new GraphQLObjectType({
   })
 });
 
-
-// This is the Root Query
 const RootType = new GraphQLObjectType({
     name: 'RootTypeSchema',
     description: "RootTypeSchema",
