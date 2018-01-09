@@ -35,6 +35,17 @@ const TemperatureType = new GraphQLObjectType({
   })
 });
 
+const GasType = new GraphQLObjectType({
+  name: "GasType",
+  description: "This represents an Gas",
+  fields: () => ({
+    c: {type: new GraphQLNonNull(GraphQLString)},
+    d: {type: new GraphQLNonNull(GraphQLString)},
+    v: {type: new GraphQLNonNull(GraphQLString)}
+  })
+});
+
+
 // This is the Root Query
 const RootType = new GraphQLObjectType({
     name: 'RootTypeSchema',
@@ -60,6 +71,17 @@ const RootType = new GraphQLObjectType({
             })
   
             return temperatureMonthly;
+        }
+      },
+      gasMonthly: {
+        type: new GraphQLList(GasType),
+        description: "List of monthly GasType",
+        resolve: function() {
+            const gasMonthly = axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=graph&sensor=counter&idx=7&range=month').then(function (response) {
+                return response.data.result
+            })
+
+            return gasMonthly;
         }
       }
     })
