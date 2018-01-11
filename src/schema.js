@@ -24,7 +24,7 @@ const typeDefs = `
 
   type Query {
     allLightSwitches: [LightSwitch],
-    temperatureGas(interval: String): [TemperatureGas],
+    temperatureGas(tempId: String, interval: String): [TemperatureGas],
     allTempDevices: [TempDevice]
   }
 `;
@@ -34,7 +34,7 @@ const resolvers = {
     allLightSwitches: () => axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=command&param=getlightswitches').then(function (response) {
       return response.data.result
     }),
-    temperatureGas: (_, {interval}) => axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=graph&sensor=temp&idx=29&range=' + interval).then(function (response) {
+    temperatureGas: (_, {tempId, interval}) => axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=graph&sensor=temp&idx=' + tempId + '&range=' + interval).then(function (response) {
       return response.data.result
     }),
     allTempDevices: () => axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=devices&filter=temp&used=true&order=Name').then(function (response) {
