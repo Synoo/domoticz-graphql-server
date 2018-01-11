@@ -9,6 +9,11 @@ const typeDefs = `
     Name: String
   }
 
+  type TempDevice {
+    idx: Int!,
+    Name: String
+  }
+
   type TemperatureGas {
     d: String!,
     tm: Float,
@@ -19,7 +24,8 @@ const typeDefs = `
 
   type Query {
     allLightSwitches: [LightSwitch],
-    temperatureGas(interval: String): [TemperatureGas]
+    temperatureGas(interval: String): [TemperatureGas],
+    allTempDevices: [TempDevice]
   }
 `;
 
@@ -29,6 +35,9 @@ const resolvers = {
       return response.data.result
     }),
     temperatureGas: (_, {interval}) => axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=graph&sensor=temp&idx=29&range=' + interval).then(function (response) {
+      return response.data.result
+    }),
+    allTempDevices: () => axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=devices&filter=temp&used=true&order=Name').then(function (response) {
       return response.data.result
     })
   },
