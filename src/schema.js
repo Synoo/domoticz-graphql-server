@@ -14,17 +14,18 @@ const typeDefs = `
     Name: String
   }
 
-  type TemperatureGas {
+  type TemperatureUtility {
     d: String!,
     tm: Float,
     te: Float,
     ta: Float,
-    gas(interval: String): Float
+    gas(interval: String): Float,
+    electricity(interval: String): Float
   }
 
   type Query {
     allLightSwitches: [LightSwitch],
-    temperatureGas(tempId: String, interval: String): [TemperatureGas],
+    temperatureUtility(tempId: String, interval: String): [TemperatureUtility],
     allTempDevices: [TempDevice]
   }
 `;
@@ -34,16 +35,24 @@ const resolvers = {
     allLightSwitches: () => axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=command&param=getlightswitches').then(function (response) {
       return response.data.result
     }),
-    temperatureGas: (_, {tempId, interval}) => axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=graph&sensor=temp&idx=' + tempId + '&range=' + interval).then(function (response) {
+    temperatureUtility: (_, {tempId, interval}) => axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=graph&sensor=temp&idx=' + tempId + '&range=' + interval).then(function (response) {
       return response.data.result
     }),
     allTempDevices: () => axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=devices&filter=temp&used=true&order=Name').then(function (response) {
       return response.data.result
     })
   },
-  TemperatureGas: {
+  TemperatureUtility: {
     gas: (temp, {interval}) => axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=graph&sensor=counter&idx=7&range=' + interval).then(function (response) {
-      return _.find(response.data.result, { 'd': temp.d}).v
+      if(response.data.result) {
+        return _.find(response.data.result, { 'd': temp.d}).v
+      }
+    }),
+    electricity: (temp, {interval}) => axios.get('http://synoo:synoo@192.168.178.101:8080/json.htm?type=graph&sensor=counter&idx=5&range=' + interval).then(function (response) {
+      if(response.data.result) {
+        result = _.find(response.data.result, { 'd': temp.d})
+        return  parseFloat(result.v) + parseFloat(result.v2)
+      }
     })
   }
 }
